@@ -1,0 +1,20 @@
+{
+  "name": "asana-child",
+  "version": "1.0.0",
+  "description": "Thème enfant Asana avec fonctionnalités cours en ligne",
+  "main": "index.js",
+  "scripts": {
+    "build": "sass scss/style.scss style.css",
+    "watch": "sass --watch scss/style.scss style.css",
+    "build:compressed": "sass scss/style.scss style.css --style compressed",
+    "build:expanded": "sass scss/style.scss style.css --style expanded",
+    "dev": "nodemon --watch scss --ext scss --exec 'npm run build'"
+  },
+  "keywords": ["wordpress", "theme", "scss", "woocommerce"],
+  "author": "Votre nom",
+  "license": "ISC",
+  "devDependencies": {
+    "sass": "^1.69.0",
+    "nodemon": "^3.0.0"
+  }
+}

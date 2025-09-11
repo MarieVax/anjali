@@ -1,0 +1,65 @@
+{
+    "key": "group_cours_en_ligne",
+    "title": "Cours en ligne",
+    "fields": [
+        {
+            "key": "field_cours_url",
+            "label": "URL du cours",
+            "name": "cours_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Entrez l'URL complète du cours en ligne (YouTube, Vimeo, etc.)",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https:\/\/www.youtube.com\/watch?v=...",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_68ab1ee97f636",
+            "label": "Durée",
+            "name": "duree",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "1h",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "video"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Champs pour les cours en ligne",
+    "show_in_rest": 0,
+    "modified": 1756048483
+}

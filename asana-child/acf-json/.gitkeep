@@ -1,0 +1,3 @@
+# Ce fichier permet de garder le dossier acf-json dans Git même s'il est vide
+# Les exports JSON des champs ACF seront stockés ici
+
