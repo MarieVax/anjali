@@ -48,9 +48,9 @@ $duree = get_field('duree');
       <?php endif; ?>
 
       <!-- Extrait -->
-      <?php if (has_excerpt()) : ?>
+      <?php if (get_the_content()) : ?>
         <div class="video-excerpt">
-          <?php the_content(); ?>
+          <?php the_excerpt(); ?>
         </div>
       <?php endif; ?>
 
