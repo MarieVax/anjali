@@ -380,16 +380,12 @@ html body.woocommerce-account #header .headerWrap {
   font-weight: 500;
 }
 
-.video-excerpt {
+.video-excerpt, .video-content {
   font-size: 0.95rem;
   color: #666;
   line-height: 1.5;
   margin-bottom: 15px;
   flex: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .video-categories {
