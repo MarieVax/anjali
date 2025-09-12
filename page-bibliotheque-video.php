@@ -90,32 +90,33 @@ get_header();
         </div>
 
         <!-- Carte de droite - Dernier CPT Video de cours-hebdo -->
-        <div class="featured-video-card featured-latest">
-          <?php
-          // Récupérer le dernier CPT Video de la catégorie cours-hebdo
-          $latest_video_query = new WP_Query(array(
-            'post_type' => 'video',
-            'posts_per_page' => 1,
-            'post_status' => 'publish',
-            'orderby' => 'date',
-            'order' => 'DESC',
-            'tax_query' => array(
-              array(
-                'taxonomy' => 'video_category',
-                'field' => 'slug',
-                'terms' => 'cours-hebdos',
-                'operator' => 'IN'
-              )
+
+        <?php
+        // Récupérer le dernier CPT Video de la catégorie cours-hebdo
+        $latest_video_query = new WP_Query(array(
+          'post_type' => 'video',
+          'posts_per_page' => 1,
+          'post_status' => 'publish',
+          'orderby' => 'date',
+          'order' => 'DESC',
+          'tax_query' => array(
+            array(
+              'taxonomy' => 'video_category',
+              'field' => 'slug',
+              'terms' => 'cours-hebdos',
+              'operator' => 'IN'
             )
-          ));
+          )
+        ));
 
-          if ($latest_video_query->have_posts()) :
-            while ($latest_video_query->have_posts()) : $latest_video_query->the_post();
-              $latest_duree = get_field('duree');
-              $latest_cours_url = get_field('cours_url');
-          ?>
+        if ($latest_video_query->have_posts()) :
+          while ($latest_video_query->have_posts()) : $latest_video_query->the_post();
+            $latest_duree = get_field('duree');
+            $latest_cours_url = get_field('cours_url');
+        ?>
 
-              <?php if ($latest_cours_url) : ?>
+            <?php if ($latest_cours_url) : ?>
+              <div class="featured-video-card featured-latest">
                 <a href="<?php echo esc_url($latest_cours_url); ?>" target="_blank" class="featured-video-link">
                 <?php endif; ?>
 
@@ -147,14 +148,15 @@ get_header();
 
                 <?php if ($latest_cours_url) : ?>
                 </a>
-              <?php endif; ?>
+              </div>
+            <?php endif; ?>
 
-          <?php
-            endwhile;
-            wp_reset_postdata();
-          endif;
-          ?>
-        </div>
+        <?php
+          endwhile;
+          wp_reset_postdata();
+        endif;
+        ?>
+
 
       </div>
     </div>

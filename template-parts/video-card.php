@@ -50,7 +50,7 @@ $duree = get_field('duree');
       <!-- Extrait -->
       <?php if (has_excerpt()) : ?>
         <div class="video-excerpt">
-          <?php the_excerpt(); ?>
+          <?php the_content(); ?>
         </div>
       <?php endif; ?>
 
