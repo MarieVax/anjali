@@ -358,6 +358,23 @@ function add_online_course_styles()
 }
 add_action('wp_head', 'add_online_course_styles');
 
+/**
+ * Rediriger vers la page "Mon compte" après le checkout pour les utilisateurs connectés
+ */
+function redirect_to_my_account_after_checkout($order_id)
+{
+	// Vérifier si l'utilisateur est connecté
+	if (is_user_logged_in()) {
+		// Récupérer l'URL de la page "Mon compte"
+		$my_account_url = wc_get_page_permalink('myaccount');
+
+		// Rediriger vers la page "Mon compte"
+		wp_redirect($my_account_url);
+		exit;
+	}
+}
+add_action('woocommerce_thankyou', 'redirect_to_my_account_after_checkout');
+
 
 // Vérifier si l'utilisateur a une commande avec un produit de la catégorie "Cours en ligne"
 function user_has_online_course_order()

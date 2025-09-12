@@ -20,9 +20,6 @@ function add_courses_banner_to_myaccount()
 {
   // Vérifier si l'utilisateur est connecté
   if (is_user_logged_in()) {
-    var_dump(user_has_online_course_order());
-    var_dump(is_subscription_active());
-
 
     // Afficher la bannière seulement si l'utilisateur a une commande avec un cours en ligne et une inscription active
     if (((user_has_online_course_order() && is_subscription_active())) || current_user_can('administrator')) {
