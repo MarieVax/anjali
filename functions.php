@@ -375,6 +375,48 @@ function redirect_to_my_account_after_checkout($order_id)
 }
 add_action('woocommerce_thankyou', 'redirect_to_my_account_after_checkout');
 
+/**
+ * Ajouter un bouton "Accéder à vos cours en ligne" dans l'email de confirmation de commande
+ */
+function add_online_courses_button_to_order_email($order, $sent_to_admin, $plain_text, $email)
+{
+	// Vérifier si c'est l'email de confirmation de commande et si l'utilisateur est connecté
+	if (!$sent_to_admin && is_user_logged_in() && $email->id === 'customer_completed_order') {
+
+		// Vérifier si la commande contient des cours en ligne
+		$has_online_course = false;
+		foreach ($order->get_items() as $item) {
+			if (has_term('cours-en-ligne', 'product_cat', $item->get_product_id())) {
+				$has_online_course = true;
+				break;
+			}
+		}
+
+		// Si la commande contient des cours en ligne, ajouter le bouton
+		if ($has_online_course) {
+			if ($plain_text) {
+				// Version texte brut
+				echo "\n\n" . str_repeat('=', 50) . "\n";
+				echo "ACCÉDER À VOS COURS EN LIGNE\n";
+				echo str_repeat('=', 50) . "\n";
+				echo "Cliquez sur le lien suivant pour accéder à votre bibliothèque de cours :\n";
+				echo "https://www.anjali-eau-bien-etre.com/cours-en-ligne/\n";
+				echo str_repeat('=', 50) . "\n\n";
+			} else {
+				// Version HTML
+				echo '<div style="margin: 30px 0; text-align: center;">';
+				echo '<div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 20px 0;">';
+				echo '<h3 style="color: #389ddf; margin: 0 0 15px 0; font-size: 18px;">🎥 Vos cours en ligne sont disponibles !</h3>';
+				echo '<p style="margin: 0 0 20px 0; color: #666; font-size: 14px;">Accédez à votre bibliothèque de cours en ligne dès maintenant.</p>';
+				echo '<a href="https://www.anjali-eau-bien-etre.com/cours-en-ligne/" style="display: inline-block; background-color: #389ddf; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 25px; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; transition: background-color 0.3s ease;">Accéder à vos cours en ligne</a>';
+				echo '</div>';
+				echo '</div>';
+			}
+		}
+	}
+}
+add_action('woocommerce_email_order_details', 'add_online_courses_button_to_order_email', 20, 4);
+
 
 // Vérifier si l'utilisateur a une commande avec un produit de la catégorie "Cours en ligne"
 function user_has_online_course_order()
