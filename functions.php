@@ -415,7 +415,7 @@ function add_online_courses_button_to_order_email($order, $sent_to_admin, $plain
 		}
 	}
 }
-add_action('woocommerce_email_order_details', 'add_online_courses_button_to_order_email', 20, 4);
+//add_action('woocommerce_email_order_details', 'add_online_courses_button_to_order_email', 20, 4);
 
 
 // Vérifier si l'utilisateur a une commande avec un produit de la catégorie "Cours en ligne"
