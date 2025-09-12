@@ -412,7 +412,6 @@ function is_subscription_active()
 			if (has_term('cours-en-ligne', 'product_cat', $product_id)) {
 				$variation_id = $item->get_variation_id();
 				$order_date = $order->get_date_created();
-				var_dump($order_date);
 				break 2;
 			}
 		}
@@ -447,7 +446,6 @@ function is_subscription_active()
 
 	$products = get_posts($args);
 	$online_course_product = !empty($products) ? $products[0] : null;
-	var_dump($online_course_product);
 	if ($online_course_product) {
 		$product = wc_get_product($online_course_product->ID);
 		if ($product && $product->is_type('variable')) {
