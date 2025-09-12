@@ -20,7 +20,7 @@ $duree = get_field('duree');
     <!-- Image à la une -->
     <div class="video-thumbnail">
       <?php if (has_post_thumbnail()) : ?>
-        <?php the_post_thumbnail('medium'); ?>
+        <?php the_post_thumbnail('large'); ?>
         <div class="video-play-overlay">
           <span class="play-icon">▶</span>
         </div>
