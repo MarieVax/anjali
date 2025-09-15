@@ -201,24 +201,15 @@ add_action('woocommerce_before_single_product', 'display_login_required_message_
 
 /**
  * Désactive le bouton "Ajouter au panier" pour les cours en ligne si l'utilisateur n'est pas connecté
- * ou s'il a déjà commandé la variation "1 mois"
+ * 
  */
 function disable_add_to_cart_button_for_guests()
 {
 	if (is_product() && is_online_course_product(get_the_ID())) {
 		$product_id = get_the_ID();
 
-		// Vérifier si l'utilisateur a déjà commandé la variation "1 mois"
-		if (is_user_logged_in() && user_has_ordered_one_month_trial_variation($product_id)) {
-			remove_action('woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', 10);
-			remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
-
-			// Ajouter le message d'information à la place
-			add_action('woocommerce_after_shop_loop_item', 'display_one_month_offer_message', 10);
-			add_action('woocommerce_single_product_summary', 'display_one_month_offer_message', 30);
-		}
 		// Si l'utilisateur n'est pas connecté
-		elseif (!is_user_logged_in()) {
+		if (!is_user_logged_in()) {
 			remove_action('woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', 10);
 			remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
 
@@ -240,15 +231,6 @@ function display_login_button_instead_of_add_to_cart()
 	echo '</div>';
 }
 
-/**
- * Affiche le message d'information pour les utilisateurs ayant déjà bénéficié de l'offre d'essai de 1 mois
- */
-function display_one_month_offer_message()
-{
-	echo '<div class="woocommerce-one-month-offer-message">';
-	echo '<p class="offer-message-text">Vous avez déjà bénéficié de l\'offre d\'essai de 1 mois offert</p>';
-	echo '</div>';
-}
 
 /**
  * Force la création de compte au checkout si le panier contient des cours en ligne
@@ -378,25 +360,73 @@ function add_online_course_styles()
         .woocommerce-login-required .button:hover {
             background-color: #8a4a7d !important;
         }
-        .woocommerce-one-month-offer-message {
-            background-color: #fff3cd !important;
-            border: 1px solid #ffeaa7 !important;
-            border-left: 4px solid #f39c12 !important;
-            padding: 15px 20px !important;
-            margin: 20px 0 !important;
-            border-radius: 4px !important;
-            text-align: center !important;
-        }
-        .woocommerce-one-month-offer-message .offer-message-text {
-            margin: 0 !important;
-            color: #856404 !important;
-            font-weight: 500 !important;
-            font-size: 14px !important;
-        }
         </style>';
 	}
 }
 add_action('wp_head', 'add_online_course_styles');
+
+/**
+ * Supprime l'option "1 mois d'essai offert" du dropdown des variations si l'utilisateur l'a déjà commandée
+ */
+function remove_trial_variation_option($args, $product, $variation)
+{
+	// Vérifier si c'est un produit de cours en ligne et si l'utilisateur est connecté
+	if (is_online_course_product($product->get_id()) && is_user_logged_in()) {
+
+		// Vérifier si l'utilisateur a déjà commandé la variation "1 mois d'essai offert"
+		if (user_has_ordered_one_month_trial_variation($product->get_id())) {
+
+			// Si c'est l'attribut "duree", supprimer l'option "1 mois d'essai offert"
+			if (isset($args['attribute']) && $args['attribute'] === 'duree') {
+				$options = $args['options'];
+
+				// Supprimer l'option "1 mois d'essai offert" si elle existe
+				if (isset($options['1 mois d\'essai offert'])) {
+					unset($options['1 mois d\'essai offert']);
+					$args['options'] = $options;
+				}
+			}
+		}
+	}
+
+	return $args;
+}
+add_filter('woocommerce_dropdown_variation_attribute_options_args', 'remove_trial_variation_option', 10, 3);
+
+/**
+ * Empêche l'ajout au panier de la variation "1 mois d'essai offert" si l'utilisateur l'a déjà commandée
+ */
+function prevent_trial_variation_add_to_cart($passed, $product_id, $quantity, $variation_id = 0, $variations = array())
+{
+	// Vérifier si c'est un produit de cours en ligne et si l'utilisateur est connecté
+	if (is_online_course_product($product_id) && is_user_logged_in()) {
+
+		// Vérifier si l'utilisateur a déjà commandé la variation "1 mois d'essai offert"
+		if (user_has_ordered_one_month_trial_variation($product_id)) {
+
+			// Si une variation est sélectionnée, vérifier si c'est "1 mois d'essai offert"
+			if ($variation_id > 0) {
+				$variation = wc_get_product($variation_id);
+				if ($variation) {
+					$variation_attributes = $variation->get_variation_attributes();
+					if (isset($variation_attributes['attribute_duree']) && $variation_attributes['attribute_duree'] === '1 mois d\'essai offert') {
+						wc_add_notice('Vous avez déjà bénéficié de l\'offre d\'essai de 1 mois offert.', 'error');
+						return false;
+					}
+				}
+			}
+
+			// Vérifier aussi dans les variations passées en paramètre
+			if (isset($variations['attribute_duree']) && $variations['attribute_duree'] === '1 mois d\'essai offert') {
+				wc_add_notice('Vous avez déjà bénéficié de l\'offre d\'essai de 1 mois offert.', 'error');
+				return false;
+			}
+		}
+	}
+
+	return $passed;
+}
+add_filter('woocommerce_add_to_cart_validation', 'prevent_trial_variation_add_to_cart', 10, 5);
 
 /**
  * Rediriger vers la page "Mon compte" après le checkout pour les utilisateurs connectés
@@ -574,7 +604,7 @@ function is_subscription_active()
 }
 
 /**
- * Vérifie si l'utilisateur a déjà commandé le produit avec la variation "1 mois"
+ * Vérifie si l'utilisateur a déjà commandé le produit avec la variation "1 mois d'essai offert"
  */
 function user_has_ordered_one_month_trial_variation($product_id)
 {
@@ -592,7 +622,7 @@ function user_has_ordered_one_month_trial_variation($product_id)
 		'limit' => -1
 	));
 
-	// Vérifier chaque commande pour des produits de la catégorie "Cours en ligne" avec variation "1 mois"
+	// Vérifier chaque commande pour des produits de la catégorie "Cours en ligne" avec variation "1 mois d'essai offert"
 	foreach ($customer_orders as $order) {
 		foreach ($order->get_items() as $item) {
 			$item_product_id = $item->get_product_id();
@@ -606,8 +636,18 @@ function user_has_ordered_one_month_trial_variation($product_id)
 					$variation = wc_get_product($variation_id);
 					if ($variation) {
 						$variation_attributes = $variation->get_variation_attributes();
-						if (isset($variation_attributes['attribute_duree']) && $variation_attributes['attribute_duree'] === '1 mois d\'essai offert') {
-							return true;
+
+						// Debug : afficher les attributs pour vérifier
+						// error_log('Variation attributes: ' . print_r($variation_attributes, true));
+
+						if (isset($variation_attributes['attribute_duree'])) {
+							$duree_value = $variation_attributes['attribute_duree'];
+							// Debug : afficher la valeur de durée
+							// error_log('Durée trouvée: "' . $duree_value . '"');
+
+							if ($duree_value === '1 mois d\'essai offert') {
+								return true;
+							}
 						}
 					}
 				}
