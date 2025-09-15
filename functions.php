@@ -201,16 +201,31 @@ add_action('woocommerce_before_single_product', 'display_login_required_message_
 
 /**
  * Désactive le bouton "Ajouter au panier" pour les cours en ligne si l'utilisateur n'est pas connecté
+ * ou s'il a déjà commandé la variation "1 mois"
  */
 function disable_add_to_cart_button_for_guests()
 {
-	if (!is_user_logged_in() && is_product() && is_online_course_product(get_the_ID())) {
-		remove_action('woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', 10);
-		remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
+	if (is_product() && is_online_course_product(get_the_ID())) {
+		$product_id = get_the_ID();
 
-		// Ajouter un bouton de connexion à la place
-		add_action('woocommerce_after_shop_loop_item', 'display_login_button_instead_of_add_to_cart', 10);
-		add_action('woocommerce_single_product_summary', 'display_login_button_instead_of_add_to_cart', 30);
+		// Vérifier si l'utilisateur a déjà commandé la variation "1 mois"
+		if (is_user_logged_in() && user_has_ordered_one_month_trial_variation($product_id)) {
+			remove_action('woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', 10);
+			remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
+
+			// Ajouter le message d'information à la place
+			add_action('woocommerce_after_shop_loop_item', 'display_one_month_offer_message', 10);
+			add_action('woocommerce_single_product_summary', 'display_one_month_offer_message', 30);
+		}
+		// Si l'utilisateur n'est pas connecté
+		elseif (!is_user_logged_in()) {
+			remove_action('woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', 10);
+			remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
+
+			// Ajouter un bouton de connexion à la place
+			add_action('woocommerce_after_shop_loop_item', 'display_login_button_instead_of_add_to_cart', 10);
+			add_action('woocommerce_single_product_summary', 'display_login_button_instead_of_add_to_cart', 30);
+		}
 	}
 }
 add_action('wp', 'disable_add_to_cart_button_for_guests');
@@ -222,6 +237,16 @@ function display_login_button_instead_of_add_to_cart()
 {
 	echo '<div class="woocommerce-login-required">';
 	echo '<a href="/mon-compte/" class="single_add_to_cart_button button alt">Se connecter pour acheter</a>';
+	echo '</div>';
+}
+
+/**
+ * Affiche le message d'information pour les utilisateurs ayant déjà bénéficié de l'offre d'essai de 1 mois
+ */
+function display_one_month_offer_message()
+{
+	echo '<div class="woocommerce-one-month-offer-message">';
+	echo '<p class="offer-message-text">Vous avez déjà bénéficié de l\'offre d\'essai de 1 mois offert</p>';
 	echo '</div>';
 }
 
@@ -352,6 +377,21 @@ function add_online_course_styles()
         }
         .woocommerce-login-required .button:hover {
             background-color: #8a4a7d !important;
+        }
+        .woocommerce-one-month-offer-message {
+            background-color: #fff3cd !important;
+            border: 1px solid #ffeaa7 !important;
+            border-left: 4px solid #f39c12 !important;
+            padding: 15px 20px !important;
+            margin: 20px 0 !important;
+            border-radius: 4px !important;
+            text-align: center !important;
+        }
+        .woocommerce-one-month-offer-message .offer-message-text {
+            margin: 0 !important;
+            color: #856404 !important;
+            font-weight: 500 !important;
+            font-size: 14px !important;
         }
         </style>';
 	}
@@ -527,6 +567,51 @@ function is_subscription_active()
 
 			$is_active = ($diff->days < $duration_days) ? true : false;
 			return $is_active;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Vérifie si l'utilisateur a déjà commandé le produit avec la variation "1 mois"
+ */
+function user_has_ordered_one_month_trial_variation($product_id)
+{
+	// Vérifier si l'utilisateur est connecté
+	if (!is_user_logged_in()) {
+		return false;
+	}
+
+	$user_id = get_current_user_id();
+
+	// Récupérer toutes les commandes de l'utilisateur
+	$customer_orders = wc_get_orders(array(
+		'customer_id' => $user_id,
+		'status' => array('completed', 'processing', 'on-hold'),
+		'limit' => -1
+	));
+
+	// Vérifier chaque commande pour des produits de la catégorie "Cours en ligne" avec variation "1 mois"
+	foreach ($customer_orders as $order) {
+		foreach ($order->get_items() as $item) {
+			$item_product_id = $item->get_product_id();
+			$variation_id = $item->get_variation_id();
+
+			// Vérifier si c'est le même produit et s'il appartient à la catégorie "Cours en ligne"
+			if ($item_product_id == $product_id && has_term('cours-en-ligne', 'product_cat', $item_product_id)) {
+
+				// Si c'est une variation, vérifier l'attribut durée
+				if ($variation_id > 0) {
+					$variation = wc_get_product($variation_id);
+					if ($variation) {
+						$variation_attributes = $variation->get_variation_attributes();
+						if (isset($variation_attributes['attribute_duree']) && $variation_attributes['attribute_duree'] === '1 mois d\'essai offert') {
+							return true;
+						}
+					}
+				}
+			}
 		}
 	}
 
