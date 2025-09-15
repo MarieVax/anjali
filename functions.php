@@ -391,7 +391,7 @@ function remove_trial_variation_option($args, $product, $variation)
 
 	return $args;
 }
-add_filter('woocommerce_dropdown_variation_attribute_options_args', 'remove_trial_variation_option', 10, 3);
+//add_filter('woocommerce_dropdown_variation_attribute_options_args', 'remove_trial_variation_option', 10, 3);
 
 /**
  * Empêche l'ajout au panier de la variation "1 mois d'essai offert" si l'utilisateur l'a déjà commandée
@@ -426,7 +426,7 @@ function prevent_trial_variation_add_to_cart($passed, $product_id, $quantity, $v
 
 	return $passed;
 }
-add_filter('woocommerce_add_to_cart_validation', 'prevent_trial_variation_add_to_cart', 10, 5);
+//add_filter('woocommerce_add_to_cart_validation', 'prevent_trial_variation_add_to_cart', 10, 5);
 
 /**
  * Rediriger vers la page "Mon compte" après le checkout pour les utilisateurs connectés
