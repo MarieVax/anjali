@@ -391,7 +391,27 @@ function remove_trial_variation_option($args, $product, $variation)
 
 	return $args;
 }
-//add_filter('woocommerce_dropdown_variation_attribute_options_args', 'remove_trial_variation_option', 10, 3);
+add_filter('woocommerce_dropdown_variation_attribute_options_args', 'remove_trial_variation_option', 10, 3);
+
+/**
+ * Alternative: Supprime l'option via JavaScript si le filtre ne fonctionne pas
+ */
+function add_trial_variation_removal_script()
+{
+	if (is_product() && is_online_course_product(get_the_ID()) && is_user_logged_in()) {
+		if (user_has_ordered_one_month_trial_variation(get_the_ID())) {
+?>
+			<script type="text/javascript">
+				jQuery(document).ready(function($) {
+					// Supprimer l'option "1 mois d'essai offert" du dropdown
+					$('select[name="attribute_duree"] option[value="1 mois d\'essai offert"]').remove();
+				});
+			</script>
+<?php
+		}
+	}
+}
+add_action('wp_footer', 'add_trial_variation_removal_script');
 
 /**
  * Empêche l'ajout au panier de la variation "1 mois d'essai offert" si l'utilisateur l'a déjà commandée
@@ -426,7 +446,7 @@ function prevent_trial_variation_add_to_cart($passed, $product_id, $quantity, $v
 
 	return $passed;
 }
-//add_filter('woocommerce_add_to_cart_validation', 'prevent_trial_variation_add_to_cart', 10, 5);
+add_filter('woocommerce_add_to_cart_validation', 'prevent_trial_variation_add_to_cart', 10, 5);
 
 /**
  * Rediriger vers la page "Mon compte" après le checkout pour les utilisateurs connectés
